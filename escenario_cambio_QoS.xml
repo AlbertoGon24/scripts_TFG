@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<vnx xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="/usr/share/xml/vnx/vnx-2.00.xsd">
+  <global>
+    <version>2.0</version>
+    <scenario_name>escenario_cambio_QoS</scenario_name>
+    <automac/>
+    <vm_mgmt type="none" />
+    <vm_defaults>
+        <console id="0" display="no"/>
+        <console id="1" display="yes"/>
+    </vm_defaults>
+
+    <help>
+        <seq_help seq='start-www'>Start apache2 web server</seq_help>
+        <seq_help seq='stop-www'>Stop apache2 web server</seq_help>
+    </help>
+    
+  </global>
+
+  <net name="Net0" mode="virtual_bridge" />
+  <net name="Net1" mode="virtual_bridge"  />
+  <net name="Net3" mode="virtual_bridge" />
+
+  <net name="virbr0" mode="virtual_bridge" managed="no" />
+
+  <vm name="h1" type="lxc" arch="x86_64">
+    <filesystem type="cow">/usr/share/vnx/filesystems/rootfs_lxc</filesystem>
+    <if id="1" net="Net0">
+      <ipv4>10.1.0.2/24</ipv4>
+    </if>
+    <if id="9" net="virbr0">
+      <ipv4>dhcp</ipv4>
+    </if>
+    <route type="ipv4" gw="10.1.0.1">10.1.0.0/16</route>
+    <filetree seq="on_boot" root="/home/vnx/">
+      conf/videoTFG.mp4
+    </filetree>
+  </vm>
+
+  <vm name="h2" type="lxc" arch="x86_64">
+    <filesystem type="cow">/usr/share/vnx/filesystems/rootfs_lxc</filesystem>
+    <if id="1" net="Net1">
+      <ipv4>10.1.1.2/24</ipv4>
+    </if>
+    <if id="9" net="virbr0">
+      <ipv4>dhcp</ipv4>
+    </if>
+    <route type="ipv4" gw="10.1.1.1">10.1.0.0/16</route>
+  </vm>
+
+  <vm name="r1" type="lxc" arch="x86_64">
+    <filesystem type="cow">/usr/share/vnx/filesystems/rootfs_lxc</filesystem>
+    <if id="1" net="Net0">
+      <ipv4>10.1.0.1/24</ipv4>
+    </if>
+    <if id="2" net="Net1">
+      <ipv4>10.1.1.1/24</ipv4>
+    </if>
+    <if id="3" net="Net3">
+      <ipv4>10.1.3.1/24</ipv4>
+    </if>
+    <if id="9" net="virbr0">
+      <ipv4>dhcp</ipv4>
+    </if>    
+    <forwarding type="ip" />
+    <filetree seq="on_boot" root="/home/vnx/">
+      conf/script_tc.py
+    </filetree>
+    <filetree seq="on_boot" root="/home/vnx/">
+      conf/apirest.py
+    </filetree>
+  </vm>
+
+ 
+  
+  <host>
+    <hostif net="Net3">
+       <ipv4>10.1.3.2/24</ipv4>
+    </hostif>
+    <route type="ipv4" gw="10.1.3.1">10.1.0.0/16</route>
+    <forwarding type="ip" />
+  </host>
+
+</vnx>
